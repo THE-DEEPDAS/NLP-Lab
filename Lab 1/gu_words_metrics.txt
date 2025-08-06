@@ -1,0 +1,6 @@
+Total words: 1465
+Total characters: 6479
+Number of sentences (approx): 100
+Words per sentence (approx): 14.65
+Average characters per word: 4.42
+Type-Token Ratio (TTR): 0.6123

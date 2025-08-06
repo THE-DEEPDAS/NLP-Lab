@@ -1,0 +1,99 @@
+import re
+
+def gujarati_word_tokenizer(text):
+    # Patterns for URLs, emails, dates, numbers with commas/periods
+    url_pattern = r'https?://[^\s]+'
+    email_pattern = r'[\w\.-]+@[\w\.-]+\.\w+'
+    date_pattern = r'\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{1,2}\s*[જાન્યુઆરી|ફેબ્રુઆરી|માર્ચ|એપ્રિલ|મે|જૂન|જુલાઈ|ઑગસ્ટ|સપ્ટેમ્બર|ઑક્ટોબર|નવેમ્બર|ડિસેમ્બર]+\s*\d{2,4}'
+    # Numbers with commas or periods (English and Gujarati)
+    num_pattern = r'(?:[\d\u0AE6-\u0AEF]+(?:[\.,][\d\u0AE6-\u0AEF]+)+)'
+    # English numbers followed by a dot (e.g., 49.)
+    eng_num_dot_pattern = r'\d+\.'
+    # Gujarati numbers (standalone)
+    guj_num_pattern = r'[\u0AE6-\u0AEF]+'
+    # English numbers (standalone)
+    eng_num_pattern = r'\d+'
+    # Gujarati words
+    guj_word_pattern = r'[\u0A80-\u0AFF]+(?:[\u0ABE-\u0ACC\u0A81-\u0A83\u0ACD]*)'
+    # Punctuation
+    punct_pattern = r'[\.।\u0964,!?…]' # includes . | danda | gujarati full stop | , ! ? …
+    # Ellipsis
+    ellipsis_pattern = r'\.\.\.'
+
+    # Combine all patterns
+    combined_pattern = f'({url_pattern})|({email_pattern})|({date_pattern})|({eng_num_dot_pattern})|({num_pattern})|({ellipsis_pattern})|({punct_pattern})|({guj_num_pattern})|({eng_num_pattern})|({guj_word_pattern})'
+    words = [w for w in re.findall(combined_pattern, text)]
+    # Flatten and filter empty
+    flat_words = []
+    for tup in words:
+        for w in tup:
+            if w:
+                flat_words.append(w)
+    return flat_words
+
+
+# Efficient chunked processing for large files
+def process_in_chunks(input_file, output_file, tokenizer, chunk_size=1024 * 1024 * 100):  # 100 MB chunks
+    buffer = ""
+
+    with open(input_file, "r", encoding="utf-8", errors="ignore") as infile, \
+         open(output_file, "w", encoding="utf-8") as outfile:
+
+        while True:
+            chunk = infile.read(chunk_size)
+            if not chunk:
+                break
+
+            buffer += chunk
+
+            # Optional: flush on sentence boundaries or after N chars
+            if len(buffer) > chunk_size:
+                # Process the current buffer
+                words = tokenizer(buffer)
+                for word in words:
+                    if re.match(r'^\d+\.$', word):
+                        outfile.write(word + ' ')
+                    elif word in ['.', '।', '\u0964', '…', '...']:
+                        outfile.write(word + '\n')
+                    else:
+                        outfile.write(word + ' ')
+                buffer = ""  # reset buffer
+
+        # Process any remaining buffer
+        if buffer.strip():
+            words = tokenizer(buffer)
+            for word in words:
+                if re.match(r'^\d+\.$', word):
+                    outfile.write(word + ' ')
+                elif word in ['.', '।', '\u0964', '…', '...']:
+                    outfile.write(word + '\n')
+                else:
+                    outfile.write(word + ' ')
+
+if __name__ == "__main__":
+    # Use chunked processing for gu.txt
+    process_in_chunks("indiccorp_gu.txt", "indiccorp_gu_words.txt", gujarati_word_tokenizer)
+    # --- Metrics calculation (streaming, memory efficient) ---
+    sentence_endings = ['.', '।', '\u0964', '…', '...']
+    total_words = 0
+    total_chars = 0
+    unique_words = set()
+    num_sentences = 0
+    with open("indiccorp_gu_words.txt", encoding="utf-8") as f:
+        for line in f:
+            words_in_line = line.strip().split()
+            total_words += len(words_in_line)
+            total_chars += sum(len(w) for w in words_in_line)
+            unique_words.update(words_in_line)
+            if any(p in line for p in sentence_endings):
+                num_sentences += 1
+    words_per_sentence = total_words / num_sentences if num_sentences else 0
+    avg_chars_per_word = total_chars / total_words if total_words else 0
+    ttr = len(unique_words) / total_words if total_words else 0
+    with open("indiccorp_gu_words_metrics.txt", "w", encoding="utf-8") as m:
+        m.write(f"Total words: {total_words}\n")
+        m.write(f"Total characters: {total_chars}\n")
+        m.write(f"Number of sentences (approx): {num_sentences}\n")
+        m.write(f"Words per sentence (approx): {words_per_sentence:.2f}\n")
+        m.write(f"Average characters per word: {avg_chars_per_word:.2f}\n")
+        m.write(f"Type-Token Ratio (TTR): {ttr:.4f}\n")

@@ -1,0 +1,67 @@
+The main one is sentence_tokenizer_Regex and word_tokenizer_Regex and the tokenizer_layman is the best one and is under development.
+
+# Some basic rules
+direct word lakho to direct word match thay jaay
+[] aama kai pan lakhe to direct match ni thay, aama pattern match kare
+[^0-9] = ^ this is negation symbol
+a? → a or empty
+a{3} means aaa like a 3 times
+a{2, 4} means aa to aaaa all works
+^a → "starts with a"
+z$ → "ends with z"
+\b is word boundary
+\bcat\b matches only "cat", not "somecatsh"
+
+| Char | Meaning                             |             |
+| ---- | ----------------------------------- | ----------- |
+| `.`  | Any single character except newline |             |
+| `\d` | Digit (`[0-9]`)                     |             |
+| `\D` | Non-digit (`[^0-9]`)                |             |
+| `\w` | Word character (`[A-Za-z0-9_]`)     |             |
+| `\W` | Non-word character (`[^\w]`)        |             |
+| `\s` | Whitespace (space, tab, newline)    |             |
+| `\S` | Non-whitespace                      |             |
+| \`   | \`                                  | OR operator |
+| `()` | Grouping                            |             |
+| `[]` | Character set                       |             |
+| `\`  | Escape special character            |             |
+
+---
+Gujarati Sentence and Word Tokenizer Project: Code Explanation and Debugging Journey
+
+Code Explanation
+----------------
+I created two main Python scripts for Gujarati text tokenization:
+
+1. **tokenizer_Regex.py**
+   - This script implements a word tokenizer for Gujarati. I used regex patterns that match Gujarati Unicode ranges, including matras and diacritics, so that words are correctly segmented with their associated matras. The tokenizer also protects special elements like URLs, email addresses, dates, and numbers with dots by temporarily replacing them with placeholders before splitting. After tokenization, these placeholders are restored to their original form. The results are written to `gu_words.txt`, with one word per line.
+
+2. **sentence_tokenizer_Regex.py**
+   - This script handles sentence segmentation. It uses regex to protect elements such as URLs, emails, dates, ellipsis (`...`), abbreviations (like Dr., એલ.સી.બી.), and numbers with dots from being split incorrectly. Sentences are split on punctuation marks (., !, ?, ।, 
+64) but only if they are not part of a protected element. I also implemented logic to merge sentences that are too short (less than 3 words) with the next sentence to avoid fragments. The output is written to `gu_sentences.txt`, with each sentence on a new line.
+
+Problems Faced and How I Solved Them
+------------------------------------
+While developing these tokenizers, I encountered several challenges:
+
+1. **Incorrect Splitting at Protected Elements**
+   - Initially, the sentence tokenizer was splitting at ellipsis, abbreviations, and numbers with dots, treating them as sentence boundaries. To solve this, I introduced a protection mechanism using placeholders (e.g., `__PROTECTED_n__`) for these elements before splitting. After tokenization, I restored the original content.
+
+2. **Duplicate and Broken Logic in Sentence Tokenizer**
+   - At one point, the sentence tokenizer had duplicate code and broken logic, causing it to ignore the protection mechanism and split sentences incorrectly. I fixed this by cleaning up the code, removing duplicates, and ensuring that the splitting logic only operated on unprotected text.
+
+3. **Single Words Becoming Sentences**
+   - Sometimes, the tokenizer would output single words as sentences due to aggressive splitting. I added a merging step to combine short sentences (less than 3 words) with the following sentence, resulting in more natural sentence boundaries.
+
+4. **Matra Handling in Word Tokenizer**
+   - Properly associating matras with their base letters was tricky. I refined the regex patterns to ensure matras are always included with the preceding consonant or vowel, so words are not split incorrectly.
+
+5. **Edge Cases: URLs, Emails, Dates, Abbreviations**
+   - Handling these required careful regex design and placeholder protection. I iteratively tested and refined the patterns to ensure these elements were never split across sentences or words.
+
+Overall, the process involved a lot of debugging, iterative refinement, and validation against real Gujarati text. The final scripts now robustly tokenize sentences and words, handling all the tricky edge cases I encountered.
+1> email
+[a-zA-Z0-9._%+-]+ – username part: alphanumeric and valid email symbols
+@ means normal @ sign
+[a-zA-Z0-9.-]+ – domain part 
+\. = dot
