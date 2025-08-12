@@ -76,72 +76,84 @@ def gujarati_sentence_tokenizer(text):
     
     return merged
 
+class ChunkedTextGenerator:
+    def __init__(self, file_path, char_limit=5_000_000):
+        self.file_path = file_path
+        self.char_limit = char_limit
+
+    def __iter__(self):
+        buffer = []
+        total_chars = 0
+        with open(self.file_path, encoding="utf-8", errors="ignore") as infile:
+            for line in infile:
+                buffer.append(line)
+                total_chars += len(line)
+                if total_chars > self.char_limit:
+                    yield "".join(buffer)
+                    buffer = []
+                    total_chars = 0
+            if buffer:
+                yield "".join(buffer)
+
+# --- Metrics calculation for large output file (streaming, memory efficient) ---
+def calculate_metrics_from_file(filename, metrics_filename):
+    total_sentences = 0
+    total_words = 0
+    total_chars = 0
+    unique_words = set()
+    with open(filename, encoding="utf-8") as f:
+        for line in f:
+            sentence = line.strip()
+            if not sentence:
+                continue
+            total_sentences += 1
+            words = sentence.split()
+            total_words += len(words)
+            total_chars += len(sentence)
+            unique_words.update(words)
+    words_per_sentence = total_words / total_sentences if total_sentences else 0
+    avg_chars_per_word = total_chars / total_words if total_words else 0
+    ttr = len(unique_words) / total_words if total_words else 0
+    with open(metrics_filename, "w", encoding="utf-8") as m:
+        m.write(f"Total sentences: {total_sentences}\n")
+        m.write(f"Total words: {total_words}\n")
+        m.write(f"Total characters: {total_chars}\n")
+        m.write(f"Words per sentence: {words_per_sentence:.2f}\n")
+        m.write(f"Average characters per word: {avg_chars_per_word:.2f}\n")
+        m.write(f"Type-Token Ratio (TTR): {ttr:.4f}\n")
+
 if __name__ == "__main__":
-    # with open("gu.txt", encoding="utf-8") as f:
-    #     text = f.read()
-    # sentences = gujarati_sentence_tokenizer(text)
-    # # Write sentences to a new file, each on a new line
-    # with open("gu_sentences.txt", "w", encoding="utf-8") as out:
-    #     for s in sentences:
-    #         out.write(s + "\n")
-    # # --- Metrics calculation ---
-    # total_sentences = len(sentences)
-    # total_words = sum(len(s.split()) for s in sentences)
-    # total_chars = sum(len(s) for s in sentences)
-    # words_per_sentence = total_words / total_sentences if total_sentences else 0
-    # avg_chars_per_word = total_chars / total_words if total_words else 0
-    # # TTR for sentence tokenizer: unique words divided by total words
-    # all_words = []
-    # for s in sentences:
-    #     all_words.extend(s.split())
-    # ttr = len(set(all_words)) / total_words if total_words else 0
-    # with open("gu_sentences_metrics.txt", "w", encoding="utf-8") as m:
-    #     m.write(f"Total sentences: {total_sentences}\n")
-    #     m.write(f"Total words: {total_words}\n")
-    #     m.write(f"Total characters: {total_chars}\n")
-    #     m.write(f"Words per sentence: {words_per_sentence:.2f}\n")
-    #     m.write(f"Average characters per word: {avg_chars_per_word:.2f}\n")
-    #     m.write(f"Type-Token Ratio (TTR): {ttr:.4f}\n")
+    with open("gu.txt", encoding="utf-8") as f:
+        text = f.read()
+    sentences = gujarati_sentence_tokenizer(text)
+    # Write sentences to a new file, each on a new line
+    with open("gu_sentences.txt", "w", encoding="utf-8") as out:
+        for s in sentences:
+            out.write(s + "\n")
+    # --- Metrics calculation ---
+    total_sentences = len(sentences)
+    total_words = sum(len(s.split()) for s in sentences)
+    total_chars = sum(len(s) for s in sentences)
+    words_per_sentence = total_words / total_sentences if total_sentences else 0
+    avg_chars_per_word = total_chars / total_words if total_words else 0
+    # TTR for sentence tokenizer: unique words divided by total words
+    all_words = []
+    for s in sentences:
+        all_words.extend(s.split())
+    ttr = len(set(all_words)) / total_words if total_words else 0
+    with open("gu_sentences_metrics.txt", "w", encoding="utf-8") as m:
+        m.write(f"Total sentences: {total_sentences}\n")
+        m.write(f"Total words: {total_words}\n")
+        m.write(f"Total characters: {total_chars}\n")
+        m.write(f"Words per sentence: {words_per_sentence:.2f}\n")
+        m.write(f"Average characters per word: {avg_chars_per_word:.2f}\n")
+        m.write(f"Type-Token Ratio (TTR): {ttr:.4f}\n")
 
     # --- Hugging Face IndicCorpV2 Gujarati Dataset Tokenization ---
-   
-    with open("indiccorp_gu.txt", encoding="utf-8", errors="ignore") as infile, \
-    open("gu_sentences_indic_corp.txt", "w", encoding="utf-8") as outfile:
-
-        buffer = []
-        char_limit = 5_000_000  
-
-        for line in infile:
-            buffer.append(line)
-            # Process in chunks
-            if sum(len(l) for l in buffer) > char_limit:
-                text_chunk = "".join(buffer)
-                sentences = gujarati_sentence_tokenizer(text_chunk)
-                for s in sentences:
-                    outfile.write(s + "\n")
-                buffer = []
-
-    # Process the final leftover buffer
-    if buffer:
-        text_chunk = "".join(buffer)
-        sentences = gujarati_sentence_tokenizer(text_chunk)
-        for s in sentences:
-            outfile.write(s + "\n")
-        # Metrics
-        total_sentences = len(sentences)
-        total_words = sum(len(s.split()) for s in sentences)
-        total_chars = sum(len(s) for s in sentences)
-        words_per_sentence = total_words / total_sentences if total_sentences else 0
-        avg_chars_per_word = total_chars / total_words if total_words else 0
-        words = []
-        for s in sentences:
-            words.extend(s.split())
-        ttr = len(set(words)) / total_words if total_words else 0
-        with open("indiccorp_gu_sentences_metrics.txt", "w", encoding="utf-8") as m:
-            m.write(f"Total sentences: {total_sentences}\n")
-            m.write(f"Total words: {total_words}\n")
-            m.write(f"Total characters: {total_chars}\n")
-            m.write(f"Words per sentence: {words_per_sentence:.2f}\n")
-            m.write(f"Average characters per word: {avg_chars_per_word:.2f}\n")
-            m.write(f"Type-Token Ratio (TTR): {ttr:.4f}\n")
-    
+    chunk_gen = ChunkedTextGenerator("indiccorp_gu.txt", char_limit=5_000_000)
+    with open("gu_sentences_indic_corp.txt", "w", encoding="utf-8") as outfile:
+        for text_chunk in chunk_gen:
+            sentences = gujarati_sentence_tokenizer(text_chunk)
+            for s in sentences:
+                outfile.write(s + "\n")
+    calculate_metrics_from_file("gu_sentences_indic_corp.txt", "gu_sentences_indic_corp_metrics.txt")
