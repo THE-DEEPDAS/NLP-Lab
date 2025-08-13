@@ -2,8 +2,8 @@ import re
 
 def gujarati_word_tokenizer(text):
     # Patterns for URLs, emails, dates, numbers with commas/periods
-    url_pattern = r'https?://[^\s]+'
-    email_pattern = r'[\w\.-]+@[\w\.-]+\.\w+'
+    url_pattern = r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}0-9(\b([-a-zA-Z)@:%_\+.~#?&//=]*)'
+    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$'
     date_pattern = r'\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{1,2}\s*[જાન્યુઆરી|ફેબ્રુઆરી|માર્ચ|એપ્રિલ|મે|જૂન|જુલાઈ|ઑગસ્ટ|સપ્ટેમ્બર|ઑક્ટોબર|નવેમ્બર|ડિસેમ્બર]+\s*\d{2,4}'
     # Numbers with commas or periods (English and Gujarati)
     num_pattern = r'(?:[\d\u0AE6-\u0AEF]+(?:[\.,][\d\u0AE6-\u0AEF]+)+)'
