@@ -1,29 +1,19 @@
 import re
 
 def gujarati_word_tokenizer(text):
-    # Patterns for URLs, emails, dates, numbers with commas/periods
     url_pattern = r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}0-9(\b([-a-zA-Z)@:%_\+.~#?&//=]*)'
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$'
     date_pattern = r'\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{1,2}\s*[જાન્યુઆરી|ફેબ્રુઆરી|માર્ચ|એપ્રિલ|મે|જૂન|જુલાઈ|ઑગસ્ટ|સપ્ટેમ્બર|ઑક્ટોબર|નવેમ્બર|ડિસેમ્બર]+\s*\d{2,4}'
-    # Numbers with commas or periods (English and Gujarati)
     num_pattern = r'(?:[\d\u0AE6-\u0AEF]+(?:[\.,][\d\u0AE6-\u0AEF]+)+)'
-    # English numbers followed by a dot (e.g., 49.)
     eng_num_dot_pattern = r'\d+\.'
-    # Gujarati numbers (standalone)
     guj_num_pattern = r'[\u0AE6-\u0AEF]+'
-    # English numbers (standalone)
     eng_num_pattern = r'\d+'
-    # Gujarati words
     guj_word_pattern = r'[\u0A80-\u0AFF]+(?:[\u0ABE-\u0ACC\u0A81-\u0A83\u0ACD]*)'
-    # Punctuation
     punct_pattern = r'[\.।\u0964,!?…]' # includes . | danda | gujarati full stop | , ! ? …
-    # Ellipsis
     ellipsis_pattern = r'\.\.\.'
 
-    # Combine all patterns
     combined_pattern = f'({url_pattern})|({email_pattern})|({date_pattern})|({eng_num_dot_pattern})|({num_pattern})|({ellipsis_pattern})|({punct_pattern})|({guj_num_pattern})|({eng_num_pattern})|({guj_word_pattern})'
     words = [w for w in re.findall(combined_pattern, text)]
-    # Flatten and filter empty
     flat_words = []
     for tup in words:
         for w in tup:
@@ -31,8 +21,6 @@ def gujarati_word_tokenizer(text):
                 flat_words.append(w)
     return flat_words
 
-
-# Efficient chunked processing for large files
 def process_in_chunks(input_file, output_file, tokenizer, chunk_size=1024 * 1024 * 100):  # 100 MB chunks
     buffer = ""
 
@@ -46,9 +34,7 @@ def process_in_chunks(input_file, output_file, tokenizer, chunk_size=1024 * 1024
 
             buffer += chunk
 
-            # Optional: flush on sentence boundaries or after N chars
             if len(buffer) > chunk_size:
-                # Process the current buffer
                 words = tokenizer(buffer)
                 for word in words:
                     if re.match(r'^\d+\.$', word):
@@ -57,9 +43,8 @@ def process_in_chunks(input_file, output_file, tokenizer, chunk_size=1024 * 1024
                         outfile.write(word + '\n')
                     else:
                         outfile.write(word + ' ')
-                buffer = ""  # reset buffer
+                buffer = ""  
 
-        # Process any remaining buffer
         if buffer.strip():
             words = tokenizer(buffer)
             for word in words:
@@ -71,9 +56,7 @@ def process_in_chunks(input_file, output_file, tokenizer, chunk_size=1024 * 1024
                     outfile.write(word + ' ')
 
 if __name__ == "__main__":
-    # Use chunked processing for gu.txt
     process_in_chunks("indiccorp_gu.txt", "indiccorp_gu_words.txt", gujarati_word_tokenizer)
-    # --- Metrics calculation (streaming, memory efficient) ---
     sentence_endings = ['.', '।', '\u0964', '…', '...']
     total_words = 0
     total_chars = 0
