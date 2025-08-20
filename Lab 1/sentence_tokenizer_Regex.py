@@ -4,7 +4,7 @@ def gujarati_sentence_tokenizer(text):
     # Patterns to protect
     url_pattern = r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}0-9(\b([-a-zA-Z)@:%_\+.~#?&//=]*)'
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$'
-    date_pattern = r'\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{1,2}\s*[જાન્યુઆરી|ફેબ્રુઆરી|માર્ચ|એપ્રિલ|મે|જૂન|જુલાઈ|ઑગસ્ટ|સપ્ટેમ્બર|ઑક્ટોબર|નવેમ્બર|ડિસેમ્બર]+\s*\d{2,4}'
+    date_pattern = r'\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{1,2}\s*(જાન્યુઆરી|ફેબ્રુઆરી|માર્ચ|એપ્રિલ|મે|જૂન|જુલાઈ|ઑગસ્ટ|સપ્ટેમ્બર|ઑક્ટોબર|નવેમ્બર|ડિસેમ્બર)\s*\d{2,4}'
     
     # Protect URLs, emails, dates, ellipsis by replacing them with placeholders
     protected = []
@@ -77,7 +77,7 @@ def gujarati_sentence_tokenizer(text):
     return merged
 
 class ChunkedTextGenerator:
-    def __init__(self, file_path, char_limit=5_000_000):
+    def __init__(self, file_path, char_limit=5000000):
         self.file_path = file_path
         self.char_limit = char_limit
 
@@ -150,10 +150,10 @@ if __name__ == "__main__":
         m.write(f"Type-Token Ratio (TTR): {ttr:.4f}\n")
 
     # --- Hugging Face IndicCorpV2 Gujarati Dataset Tokenization ---
-    chunk_gen = ChunkedTextGenerator("indiccorp_gu.txt", char_limit=5_000_000)
+    chunk_gen = ChunkedTextGenerator("indiccorp_gu.txt", char_limit=5000000)
     with open("gu_sentences_indic_corp.txt", "w", encoding="utf-8") as outfile:
         for text_chunk in chunk_gen:
             sentences = gujarati_sentence_tokenizer(text_chunk)
             for s in sentences:
-                outfile.write(s + "\n")
+                outfile.write(s + "\n\n")
     calculate_metrics_from_file("gu_sentences_indic_corp.txt", "gu_sentences_indic_corp_metrics.txt")

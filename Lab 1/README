@@ -11,6 +11,7 @@ a{2, 4} means aa to aaaa all works
 z$ → "ends with z"
 \b is word boundary
 \bcat\b matches only "cat", not "somecatsh"
+automathon treats transition labels as regex patterns
 
 | Char | Meaning                             |             |
 | ---- | ----------------------------------- | ----------- |

@@ -21,7 +21,6 @@ class NounMorphologyStemmer:
                         self.valid_nouns.add(noun)
 
     def stem(self, word: str) -> str:
-        # Try to get the singular form by removing common plural suffixes
         if word in self.irregular_plurals:
             return self.irregular_plurals[word]
         if word.endswith('ies') and len(word) > 3:
@@ -37,18 +36,14 @@ class NounMorphologyStemmer:
         word = word.strip().lower()
         if not word:
             return "Invalid Word"
-        # First, try to stem the word to get its singular form
         stemmed = self.stem(word)
-        # If the original word is in the irregular singulars, it's plural
         if word in self.irregular_singulars:
             if stemmed in self.valid_nouns:
                 return f"{word} = {stemmed}+N+PL"
             else:
                 return "Invalid Word"
-        # If the stemmed word is a valid noun and the original word is not the same as the stemmed, it's plural
         if stemmed in self.valid_nouns and word != stemmed:
             return f"{word} = {stemmed}+N+PL"
-        # If the word itself is a valid noun, it's singular
         if word in self.valid_nouns:
             return f"{word} = {word}+N+SG"
         return "Invalid Word"

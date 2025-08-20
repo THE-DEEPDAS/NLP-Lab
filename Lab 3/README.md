@@ -10,3 +10,6 @@ this is a heuristic that interprets distribution balance as low fraction = low s
 to check which trie is better it calculates which has produced max successfull splits
 
 support = n -> cnt
+
+for q2 Reading tokens from: F:\NLP Lab\Lab 1\indiccorp_gu_words.txt
+Total tokens: 997454057; Vocabulary size: 5677386
