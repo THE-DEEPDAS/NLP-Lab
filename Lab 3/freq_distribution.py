@@ -1,18 +1,4 @@
-"""
-Assignment-2 Q2: Frequency distribution and stopword removal plots.
-
-- Input: indiccorp_gu_words.txt (tokenized words, whitespace-separated; UTF-8)
-- No predefined frequency libraries (manual dict counting)
-- Outputs:
-  - freq_top100.png, freq_top100.csv
-  - For thresholds T in [5, 10, 20] (configurable):
-      freq_after_stop_T_top100.png, freq_after_stop_T_top100.csv
-
-If matplotlib is unavailable, CSVs are still written.
-"""
-
 from __future__ import annotations
-
 import os
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple

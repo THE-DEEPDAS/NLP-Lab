@@ -7,9 +7,8 @@ Requirement adjustments:
    * Unigrams: token \t count \t p(token)
    * Higher n: w1..wn \t count \t p(last|history)
  - Prints top 10 most frequent n‑grams for each order.
-
-Optional pruning: Set MAX_UNIQUE_PER_ORDER to an integer to prune low-frequency (count==1) n‑grams when size exceeds the cap (kept None by default).
 """
+
 from __future__ import annotations
 from pathlib import Path
 from collections import defaultdict, deque
@@ -28,27 +27,13 @@ def stream_tokens(path: Path):
 				if t:
 					yield t
 
-
-def prune_if_needed(counts: Dict[Tuple[str, ...], int]):
-	if MAX_UNIQUE_PER_ORDER is None:
-		return
-	if len(counts) <= MAX_UNIQUE_PER_ORDER:
-		return
-	# Remove all with count == 1 (one-pass heuristic)
-	to_remove = [k for k, v in counts.items() if v == 1]
-	for k in to_remove:
-		del counts[k]
-
-
 def unigram_prob(count: int, total: int) -> float:
 	return count / total if total else 0.0
 
-
 def conditional_prob(ngram: Tuple[str, ...], counts_n: Dict[Tuple[str, ...], int], counts_prev: Dict[Tuple[str, ...], int]) -> float:
 	history = ngram[:-1]
-	denom = counts_prev.get(history, 0)
-	return counts_n.get(ngram, 0) / denom if denom else 0.0
-
+	denom = counts_prev.get(history, 0) # frequency of history
+	return counts_n.get(ngram, 0) / denom if denom else 0.0 # P(w_n | history)
 
 def write_unigrams(counts: Dict[Tuple[str, ...], int], total: int, out_path: Path):
 	rows = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
@@ -95,7 +80,7 @@ for tok in stream_tokens(inp):
 			if hl >= need:
 				gram = tuple(hist[-need:] + [tok])
 				counts[n][gram] += 1
-				prune_if_needed(counts[n])
+				
 	window.append(tok)
 
 print(f"Total tokens: {total_tokens}; Vocabulary size: {len(vocab)}")
