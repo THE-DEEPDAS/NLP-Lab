@@ -1,14 +1,3 @@
-"""
-Lab 4 - Simple N‑gram Models (Unigram, Bigram, Trigram, Quadragram)
-
-Requirement adjustments:
- - Memory-friendly: stream tokens instead of loading whole list; maintain rolling window.
- - Outputs: unigrams.tsv, bigrams.tsv, trigrams.tsv, quadragrams.tsv
-   * Unigrams: token \t count \t p(token)
-   * Higher n: w1..wn \t count \t p(last|history)
- - Prints top 10 most frequent n‑grams for each order.
-"""
-
 from __future__ import annotations
 from pathlib import Path
 from collections import defaultdict, deque
