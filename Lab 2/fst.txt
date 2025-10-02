@@ -1,0 +1,8 @@
+| Current State | Input Symbol        | Output Symbol | Next State |
+| ------------- | ------------------- | ------------- | ---------- |
+| q0            | Σ – {s,z,x,ch,sh,y} | same as input | q0         |
+| q0            | y (after consonant) | (delete y)    | q2         |
+| q0            | {s,z,x,ch,sh}       | same as input | q1         |
+| q0            | +PL                 | s             | qf         |
+| q1            | +PL                 | es            | qf         |
+| q2            | +PL                 | ies           | qf         |

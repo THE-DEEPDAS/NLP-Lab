@@ -114,7 +114,7 @@ class NounMorphologyFST:
         
         if word in self.irregular_plurals:
             plural = self.irregular_plurals[word]
-            if self.is_valid_noun(word):
+            if self.is_valid_noun(plural):
                 return f"{word} = {word}+N+SG"
             else:
                 return "Invalid Word"

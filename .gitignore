@@ -5,3 +5,7 @@ Lab 1/final_sentence_tokenized.txt
 Lab 5/train.txt
 Lab 5/test.txt
 Lab 5/val.txt
+Lab 7/indiccorp_gu_tokenized.txt
+Lab 7/train.txt
+Lab 7/tfidf_train.npz
+__pycache__
