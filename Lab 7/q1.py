@@ -26,6 +26,7 @@ def get_counts(models):
     return uni_counts, bi_counts, total_unigrams, total_bigrams
 
 def compute_pmi(uni_counts, bi_counts, total_unigrams, total_bigrams, min_count=MIN_COUNT):
+    # count upon total formula use kairi che for probablities
     results = []
     for (w1, w2), c_xy in bi_counts.items():
         if c_xy < min_count:
