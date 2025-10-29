@@ -1,0 +1,50 @@
+Corpus size: 1000000 sentences
+Initial vocab size: 826
+Merge 0/32000, vocab size: 826
+Merge 1000/32000, vocab size: 1826
+Merge 2000/32000, vocab size: 2826
+Merge 3000/32000, vocab size: 3826
+Merge 4000/32000, vocab size: 4826
+Merge 5000/32000, vocab size: 5826
+Merge 6000/32000, vocab size: 6826
+Merge 7000/32000, vocab size: 7826
+Merge 8000/32000, vocab size: 8826
+Merge 9000/32000, vocab size: 9826
+Merge 10000/32000, vocab size: 10826
+Merge 11000/32000, vocab size: 11826
+Merge 12000/32000, vocab size: 12826
+Merge 13000/32000, vocab size: 13826
+Merge 14000/32000, vocab size: 14826
+Merge 15000/32000, vocab size: 15826
+Merge 16000/32000, vocab size: 16826
+Merge 17000/32000, vocab size: 17826
+Merge 18000/32000, vocab size: 18826
+Merge 19000/32000, vocab size: 19826
+Merge 20000/32000, vocab size: 20826
+Merge 21000/32000, vocab size: 21826
+Merge 22000/32000, vocab size: 22826
+Merge 23000/32000, vocab size: 23826
+Merge 24000/32000, vocab size: 24826
+Merge 25000/32000, vocab size: 25826
+Merge 26000/32000, vocab size: 26826
+Merge 27000/32000, vocab size: 27826
+Merge 28000/32000, vocab size: 28826
+Merge 29000/32000, vocab size: 29826
+Merge 30000/32000, vocab size: 30826
+Merge 31000/32000, vocab size: 31826
+Reached vocab size 32000 at step 31174
+
+Final vocab size: 32000
+Number of merges: 31174
+
+WordPiece Encoding Examples:
+Original: જિલ્લા ફોરમમાં, જેની હકૂમતની અંદર.
+Encoded: ['જ', 'લ', 'લ', 'ફ', 'ર', '##મ', '##મ', 'જ', 'ન', 'હ', '##ક', 'મ', '##ત', '##ન', 'અ', 'દ', '##ર']
+
+Original: તમારા એમ્પ્લોયરનું નામ, તમારા કાર્યાલયનું સરનામું, કાર્યાલય ટેલિફોન નંબર, તમે કેટલા લર, તમે કેટલા લાંબા સમયથી આ કંપની સાથે કાર્યરત થઈ ગયા છો, અને તમારા વ્યવસાયની જાણ કરો.
+Encoded: ['ત', '##મ', 'ર', 'એ', '##મ', 'પ', 'લ', 'ય', '##ર', '##ન', 'ન', 'મ', 'ત', '##મ', 'ર', 'ક', 'ર', 'ય', 'લ', '##ય', '##ન', 'સ', '##ર', '##ન', 'મ', 'ક', 'ર', 'ય', 'લ', '##ય', 'ટ', 'લ', 'ફ', 'ન', 'ન', 'બ', '##ર', 'ત', '##મ', 'ક', 'ટ', '##લ', 'લ', 'બ', 'સ', '##મ', '##ય', '##થ', 'આ', 'ક', 'પ', '##ન', 'સ', 'થ', 'ક', 'ર', 'ય', '##ર', '##ત', 'થ', '##ઈ', 'ગ', '##ય', 'છ', 'અ', '##ન', 'ત', '##મ', 'ર', 'વ', 'ય', '##વ', '##સ', 'ય', '##ન', 'જ', 'ણ', 'ક', '##ર']
+
+Original: ભાઈ, જુઓ છો ને!
+Encoded: ['ભ', 'ઈ', 'જ', 'ઓ', 'છ', 'ન']
+
+Model saved to wordpiece_model.json

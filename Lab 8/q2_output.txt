@@ -1,0 +1,168 @@
+Class priors:
+  Inform: 0.333333
+  Promo: 0.333333
+  Reminder: 0.333333
+
+Binary feature probabilities:
+  Class Inform:
+    has_url: present=0.638889, absent=0.361111
+    has_number: present=0.361111, absent=0.638889
+    has_punct: present=0.916667, absent=0.083333
+  Class Promo:
+    has_url: present=0.361111, absent=0.638889
+    has_number: present=0.916667, absent=0.083333
+    has_punct: present=0.916667, absent=0.083333
+  Class Reminder:
+    has_url: present=0.083333, absent=0.916667
+    has_number: present=0.916667, absent=0.083333
+    has_punct: present=0.916667, absent=0.083333
+
+Bigram probabilities:
+  Inform -> '12345 will': 0.036723
+  Inform -> 'arrive tomorrow': 0.036723
+  Inform -> 'check out': 0.036723
+  Inform -> 'com for': 0.036723
+  Inform -> 'download the': 0.036723
+  Inform -> 'example com': 0.036723
+  Inform -> 'for more': 0.036723
+  Inform -> 'from https': 0.036723
+  Inform -> 'https example': 0.036723
+  Inform -> 'https reports': 0.036723
+  Inform -> 'more info': 0.036723
+  Inform -> 'out https': 0.036723
+  Inform -> 'package 12345': 0.036723
+  Inform -> 'report from': 0.036723
+  Inform -> 'reports com': 0.036723
+  Inform -> 'the report': 0.036723
+  Inform -> 'will arrive': 0.036723
+  Inform -> 'your package': 0.036723
+  Inform -> <unseen>: 0.008475
+  Promo -> '1 free': 0.059896
+  Promo -> '1000 now': 0.033854
+  Promo -> '2 get': 0.033854
+  Promo -> '3 items': 0.033854
+  Promo -> 'buy 2': 0.033854
+  Promo -> 'deal for': 0.033854
+  Promo -> 'exclusive deal': 0.033854
+  Promo -> 'for you': 0.033854
+  Promo -> 'free limited': 0.033854
+  Promo -> 'get 1': 0.059896
+  Promo -> 'http winbig': 0.033854
+  Promo -> 'items get': 0.033854
+  Promo -> 'limited offer': 0.033854
+  Promo -> 'now visit': 0.033854
+  Promo -> 'order 3': 0.033854
+  Promo -> 'visit http': 0.033854
+  Promo -> 'win 1000': 0.033854
+  Promo -> 'winbig com': 0.033854
+  Promo -> 'you buy': 0.033854
+  Promo -> <unseen>: 0.007812
+  Reminder -> '10 minutes': 0.033854
+  Reminder -> '3pm don': 0.033854
+  Reminder -> '5pm today': 0.033854
+  Reminder -> 'at 3pm': 0.033854
+  Reminder -> 'bring the': 0.033854
+  Reminder -> 'by 5pm': 0.033854
+  Reminder -> 'don t': 0.033854
+  Reminder -> 'forget to': 0.033854
+  Reminder -> 'in 10': 0.033854
+  Reminder -> 'is starting': 0.033854
+  Reminder -> 'meeting at': 0.033854
+  Reminder -> 'meeting is': 0.033854
+  Reminder -> 'reminder submit': 0.033854
+  Reminder -> 'starting in': 0.033854
+  Reminder -> 'submit your': 0.033854
+  Reminder -> 't forget': 0.033854
+  Reminder -> 'the files': 0.033854
+  Reminder -> 'the meeting': 0.033854
+  Reminder -> 'timesheet by': 0.033854
+  Reminder -> 'to bring': 0.033854
+  Reminder -> 'your timesheet': 0.033854
+  Reminder -> <unseen>: 0.007812
+
+Binary feature probabilities:
+  Class Inform:
+    has_url: present=0.638889, absent=0.361111
+    has_number: present=0.361111, absent=0.638889
+    has_punct: present=0.916667, absent=0.083333
+  Class Promo:
+    has_url: present=0.361111, absent=0.638889
+    has_number: present=0.916667, absent=0.083333
+    has_punct: present=0.916667, absent=0.083333
+  Class Reminder:
+    has_url: present=0.083333, absent=0.916667
+    has_number: present=0.916667, absent=0.083333
+    has_punct: present=0.916667, absent=0.083333
+
+Bigram probabilities:
+  Class Inform:
+    '12345 will': 0.036723
+    'arrive tomorrow': 0.036723
+    'check out': 0.036723
+    'com for': 0.036723
+    'download the': 0.036723
+    'example com': 0.036723
+    'for more': 0.036723
+    'from https': 0.036723
+    'https example': 0.036723
+    'https reports': 0.036723
+    'more info': 0.036723
+    'out https': 0.036723
+    'package 12345': 0.036723
+    'report from': 0.036723
+    'reports com': 0.036723
+    'the report': 0.036723
+    'will arrive': 0.036723
+    'your package': 0.036723
+    <unseen>: 0.008475
+  Class Promo:
+    '1 free': 0.059896
+    '1000 now': 0.033854
+    '2 get': 0.033854
+    '3 items': 0.033854
+    'buy 2': 0.033854
+    'deal for': 0.033854
+    'exclusive deal': 0.033854
+    'for you': 0.033854
+    'free limited': 0.033854
+    'get 1': 0.059896
+    'http winbig': 0.033854
+    'items get': 0.033854
+    'limited offer': 0.033854
+    'now visit': 0.033854
+    'order 3': 0.033854
+    'visit http': 0.033854
+    'win 1000': 0.033854
+    'winbig com': 0.033854
+    'you buy': 0.033854
+    <unseen>: 0.007812
+  Class Reminder:
+    '10 minutes': 0.033854
+    '3pm don': 0.033854
+    '5pm today': 0.033854
+    'at 3pm': 0.033854
+    'bring the': 0.033854
+    'by 5pm': 0.033854
+    'don t': 0.033854
+    'forget to': 0.033854
+    'in 10': 0.033854
+    'is starting': 0.033854
+    'meeting at': 0.033854
+    'meeting is': 0.033854
+    'reminder submit': 0.033854
+    'starting in': 0.033854
+    'submit your': 0.033854
+    't forget': 0.033854
+    'the files': 0.033854
+    'the meeting': 0.033854
+    'timesheet by': 0.033854
+    'to bring': 0.033854
+    'your timesheet': 0.033854
+    <unseen>: 0.007812
+
+Scores for test sentence:
+  Inform: -40.817695
+  Promo: -42.934797
+  Reminder: -41.107447
+
+Predicted label: Inform
