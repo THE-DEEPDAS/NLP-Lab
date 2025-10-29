@@ -1,59 +1,134 @@
-import re
+from collections import Counter
 import json
-import math
-from collections import Counter, defaultdict
 
-MERGE_STEPS = 32000
+ITR = 32000
 VOCAB_SIZE = 32000
+test_text = "છોકરો બિલાડી સાથે રમે છે અને કૂતરો બગીચામાં દોડે છે"
 
-def read_corpus(filepath):
-    with open(filepath, 'r', encoding='utf-8') as f:
-        return [line.strip() for line in f if line.strip()]
+GUJARATI_CHARS = set(range(0x0A80, 0x0B00))
+GUJARATI_MATRAS = set([0x0ABE, 0x0ABF, 0x0AC0, 0x0AC1, 0x0AC2, 0x0AC3, 0x0AC4, 0x0AC5, 0x0AC7, 0x0AC8, 0x0AC9, 0x0ACB, 0x0ACC])
+GUJARATI_VIRAMAS = set([0x0ACD])
 
-def get_word_freqs(corpus):
-    word_freqs = Counter()
-    for line in corpus:
-        words = re.findall(r'\w+', line.lower())
-        for word in words:
-            word_freqs[word] += 1
-    return word_freqs
-
-def get_pair_scores(word_splits, word_freqs):
-    pair_counts = defaultdict(int)
-    symbol_counts = defaultdict(int)
+def gujarati_tokenize(text):
+    tokens = []
+    current_word = []
     
-    for word, symbols in word_splits.items():
+    for char in text:
+        char_code = ord(char)
+        
+        if char_code in GUJARATI_CHARS:
+            current_word.append(char)
+        elif char.isspace():
+            if current_word:
+                tokens.append(''.join(current_word))
+                current_word = []
+        elif char.isalnum():
+            current_word.append(char)
+        else:
+            if current_word:
+                tokens.append(''.join(current_word))
+                current_word = []
+    
+    if current_word:
+        tokens.append(''.join(current_word))
+    
+    return tokens
+
+def split_gujarati_word(word):
+    chars = []
+    i = 0
+    while i < len(word):
+        char = word[i]
+        char_code = ord(char)
+        
+        chars.append(char)
+        i += 1
+        
+        while i < len(word):
+            next_char = word[i]
+            next_code = ord(next_char)
+            if next_code in GUJARATI_MATRAS or next_code in GUJARATI_VIRAMAS:
+                chars[-1] += next_char
+                i += 1
+            else:
+                break
+    
+    return chars
+
+def read_sentences(filepath):
+    with open(filepath, encoding='utf-8') as f:
+        return [line.strip().lower() for line in f if line.strip()]
+
+input_sentences = read_sentences("train_sampled.txt")
+
+# collect tokens from corpus
+tokens = []
+for sentence in input_sentences:
+    sentence_tokens = gujarati_tokenize(sentence)
+    for token in sentence_tokens:
+        if any(ord(c) in GUJARATI_CHARS for c in token):
+            tokens.append(token)
+
+# build word frequencies
+word_freqs = Counter(tokens)
+
+# build initial symbol lists for each distinct word
+word_symbols = {}
+for w in set(tokens):
+    if not w:
+        continue
+    chars = split_gujarati_word(w)
+    if len(chars) == 1:
+        word_symbols[w] = [chars[0]]
+    else:
+        word_symbols[w] = [chars[0]] + [f"##{c}" for c in chars[1:]]
+
+def get_pair_counts(word_symbols, word_freqs):
+    pairs = Counter()
+    for word, symbols in word_symbols.items():
+        freq = word_freqs[word]
+        for i in range(len(symbols) - 1):
+            pairs[(symbols[i], symbols[i + 1])] += freq
+    return pairs
+
+def find_best_merge(pairs, word_symbols, word_freqs):
+    # WordPiece uses probability-based scoring: P(xy) / (P(x) * P(y))
+    symbol_counts = Counter()
+    
+    # count individual symbols weighted by word frequency
+    for word, symbols in word_symbols.items():
         freq = word_freqs[word]
         for symbol in symbols:
             symbol_counts[symbol] += freq
-        for i in range(len(symbols) - 1):
-            pair = (symbols[i], symbols[i + 1])
-            pair_counts[pair] += freq
     
-    pair_scores = {}
-    total_pairs = sum(pair_counts.values())
+    total_pairs = sum(pairs.values())
     total_symbols = sum(symbol_counts.values())
     
-    for pair, count in pair_counts.items():
-        if count > 1:
-            symbol1, symbol2 = pair
-            p_pair = count / total_pairs
-            p_symbol1 = symbol_counts[symbol1] / total_symbols
-            p_symbol2 = symbol_counts[symbol2] / total_symbols
-            
-            if p_symbol1 > 0 and p_symbol2 > 0:
-                score = p_pair / (p_symbol1 * p_symbol2)
-                pair_scores[pair] = score
+    best_pair = None
+    best_score = float('-inf')
     
-    return pair_scores
+    for (x, y), freq in pairs.items():
+        if freq > 1:  # only consider pairs that appear more than once
+            p_xy = freq / total_pairs if total_pairs > 0 else 0
+            p_x = symbol_counts[x] / total_symbols if total_symbols > 0 else 0
+            p_y = symbol_counts[y] / total_symbols if total_symbols > 0 else 0
+            
+            # WordPiece probability score: P(xy) / (P(x) * P(y))
+            if p_x > 0 and p_y > 0:
+                score = p_xy / (p_x * p_y)
+                if score > best_score:
+                    best_score = score
+                    best_pair = (x, y)
+    
+    return best_pair, best_score
 
-def merge_symbols(pair, word_splits):
+def merge_symbols(pair, word_symbols):
     symbol1, symbol2 = pair
     y_clean = symbol2[2:] if symbol2.startswith('##') else symbol2
     new_symbol = symbol1 + y_clean
     
-    new_word_splits = {}
-    for word, symbols in word_splits.items():
+    new_word_symbols = {}
+    for word, symbols in word_symbols.items():
         new_symbols = []
         i = 0
         while i < len(symbols):
@@ -63,102 +138,96 @@ def merge_symbols(pair, word_splits):
             else:
                 new_symbols.append(symbols[i])
                 i += 1
-        new_word_splits[word] = new_symbols
+        new_word_symbols[word] = new_symbols
     
-    return new_word_splits, new_symbol
+    return new_word_symbols, new_symbol
 
-# read data
-corpus = read_corpus('../train.txt')
-print(f"Corpus size: {len(corpus)} sentences")
+# perform merges using WordPiece probability scoring
+vocab_symbols = set()
+for symbols in word_symbols.values():
+    vocab_symbols.update(symbols)
 
-# get word frequencies
-word_freqs = get_word_freqs(corpus)
+print(f"Initial vocab size: {len(vocab_symbols)}")
 
-# initialize word splits
-word_splits = {}
-for word in word_freqs:
-    if len(word) <= 1:
-        word_splits[word] = [word]
-    else:
-        word_splits[word] = [word[0]] + [f"##{c}" for c in word[1:]]
-
-# build initial vocab
-vocab = set()
-for symbols in word_splits.values():
-    vocab.update(symbols)
-
-print(f"Initial vocab size: {len(vocab)}")
-
-# perform merges
-merges = []
-for i in range(MERGE_STEPS):
+merged_pairs = []
+for i in range(ITR):
     if i % 1000 == 0:
-        print(f"Merge {i}/{MERGE_STEPS}, vocab size: {len(vocab)}")
+        print(f"Merge {i}/{ITR}, vocab size: {len(vocab_symbols)}")
     
-    pair_scores = get_pair_scores(word_splits, word_freqs)
-    if not pair_scores:
+    pairs = get_pair_counts(word_symbols, word_freqs)
+    if not pairs:
+        print(f"No more pairs to merge at step {i}")
         break
     
-    if len(vocab) >= VOCAB_SIZE:
-        print(f"Reached vocab size {len(vocab)} at step {i}")
+    if len(vocab_symbols) >= VOCAB_SIZE:
+        print(f"Reached vocab size {len(vocab_symbols)} at step {i}")
         break
     
-    best_pair = max(pair_scores, key=pair_scores.get)
-    word_splits, new_symbol = merge_symbols(best_pair, word_splits)
-    merges.append((best_pair, new_symbol))
-    vocab.add(new_symbol)
+    # WordPiece: select pair with highest probability score
+    best_pair, score = find_best_merge(pairs, word_symbols, word_freqs)
+    if best_pair is None:
+        print(f"No valid pair found at step {i}")
+        break
+    
+    word_symbols, new_symbol = merge_symbols(best_pair, word_symbols)
+    merged_pairs.append((best_pair, new_symbol))
+    vocab_symbols.add(new_symbol)
+
+print(f"Training completed. Total merges: {len(merged_pairs)}")
+
+final_vocab = vocab_symbols
 
 # save model
 model_data = {
-    'vocab': list(vocab),
-    'merges': merges,
-    'word_splits': word_splits
+    'vocab': list(final_vocab),
+    'merges': merged_pairs,
+    'word_symbols': word_symbols
 }
-
 with open('wordpiece_model.json', 'w', encoding='utf-8') as f:
     json.dump(model_data, f, ensure_ascii=False)
 
-def wordpiece_encode(text, merges):
-    words = re.findall(r'\w+', text.lower())
-    encoded = []
-    
-    for word in words:
-        if len(word) <= 1:
-            tokens = [word]
-        else:
-            tokens = [word[0]] + [f"##{c}" for c in word[1:]]
+def wordpiece_tokenize(sentence, final_vocab):
+    tokens = gujarati_tokenize(sentence)
+    out = []
+    for word in tokens:
+        w = word.lower()
+        if len(w) == 0 or not any(ord(c) in GUJARATI_CHARS for c in w):
+            continue
         
-        for (symbol1, symbol2), new_symbol in merges:
-            new_tokens = []
-            i = 0
-            while i < len(tokens):
-                if i < len(tokens) - 1 and tokens[i] == symbol1 and tokens[i + 1] == symbol2:
-                    new_tokens.append(new_symbol)
-                    i += 2
+        word_pieces = []
+        i = 0
+        while i < len(w):
+            matched = None
+            # try longest possible substring starting at i (greedy longest-first matching)
+            for j in range(len(w), i, -1):
+                candidate = w[i:j]
+                if candidate in final_vocab:
+                    matched = candidate
+                    break
+                elif i > 0 and f"##{candidate}" in final_vocab:
+                    matched = f"##{candidate}"
+                    break
+            
+            if matched is None:
+                # fallback: single character with ## prefix if not at start
+                if i == 0:
+                    matched = w[i]
                 else:
-                    new_tokens.append(tokens[i])
-                    i += 1
-            tokens = new_tokens
-        
-        encoded.extend(tokens)
-    
-    return encoded
+                    matched = f"##{w[i]}"
+                i += 1
+            else:
+                # advance by actual character length (handle ## prefix correctly)
+                advance = len(matched[2:]) if matched.startswith('##') else len(matched)
+                i += advance
+            
+            word_pieces.append(matched)
+        out.extend(word_pieces)
+    return out
 
-# test encoding
-test_sentences = [
-    "જિલ્લા ફોરમમાં, જેની હકૂમતની અંદર.",
-    "તમારા એમ્પ્લોયરનું નામ, તમારા કાર્યાલયનું સરનામું, કાર્યાલય ટેલિફોન નંબર, તમે કેટલા લાંબા સમયથી આ કંપની સાથે કાર્યરત થઈ ગયા છો, અને તમારા વ્યવસાયની જાણ કરો.",
-    "ભાઈ, જુઓ છો ને!"
-]
+test_tokens = wordpiece_tokenize(test_text, final_vocab)
+print("\nWordPiece tokens for test sentence:")
+print(test_tokens)
 
-print(f"\nFinal vocab size: {len(vocab)}")
-print(f"Number of merges: {len(merges)}")
-
-print("\nWordPiece Encoding Examples:")
-for sentence in test_sentences:
-    encoded = wordpiece_encode(sentence, merges)
-    print(f"Original: {sentence}")
-    print(f"Encoded: {encoded}")
-    print()
-
+print(f"\nFinal vocab size: {len(final_vocab)}")
+print(f"Number of merges: {len(merged_pairs)}")
 print("Model saved to wordpiece_model.json")
