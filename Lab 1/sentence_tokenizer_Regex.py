@@ -107,7 +107,7 @@ def calculate_metrics_from_file(filename, metrics_filename):
             if not sentence:
                 continue
             total_sentences += 1
-            words = sentence.split()
+            words = sentence.split() # whitespace split
             total_words += len(words)
             total_chars += len(sentence)
             unique_words.update(words)

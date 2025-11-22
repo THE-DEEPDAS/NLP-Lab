@@ -6,7 +6,6 @@ from pathlib import Path
 START_TAG = "<START>"
 END_TAG = "<END>"
 
-
 def read_tagged_corpus(path):
     sentences = []
     with open(path, encoding="utf-8") as f:
